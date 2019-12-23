@@ -62,6 +62,16 @@ def draw_grid(display, grid):
     pygame.display.update()
 
 
+def button(display, pos, size, active_colour, inactive_colour, text):
+
+
+
+
+
+
+
+
+
 ## Checks if a grid is valid
 #
 # @param grid, nestesd lists that represent a 9x9 grid of intergers
