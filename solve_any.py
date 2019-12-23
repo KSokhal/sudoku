@@ -1,24 +1,33 @@
 import pygame
+from math import floor
+import copy
 
 # Set display dimensions
-DISPLAY_WIDTH = 1000
-DISPLAY_HEIGHT = 900
+DISPLAY_WIDTH = 800
+DISPLAY_HEIGHT = 600
 
 # Sets colours
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 
+grid_start_pos = (50, 50)
+cell_size = 50
+
 def main():
     grid = get_unsolved()
+    original_grid = copy.deepcopy(grid)
 
     pygame.init()
-
+    global font
+    font = pygame.font.SysFont("ubuntumono", 40)
     game_display = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
     pygame.display.set_caption("Sudoku")
     game_display.fill(WHITE)
     clock = pygame.time.Clock()
 
     end = False
+    active_cell = None
+
 
     while not end:
         # Quit case
@@ -28,42 +37,104 @@ def main():
 
         
         draw_grid(game_display, grid)
+        if button(game_display, (600, 100), (100, 50), (82, 82, 82), (42, 42, 42), "Solve"):
+            fill_in_grid(grid)
 
-        mouse = pygame.mouse.get_pos()
+        mouse_pos = pygame.mouse.get_pos()
         click = pygame.mouse.get_pressed()
+        rounding_factor = 50
+        cell_pos = (floor(mouse_pos[0] / rounding_factor) * rounding_factor, floor(mouse_pos[1] / rounding_factor) * rounding_factor)
+        if cell_pos[0] >= 50 and cell_pos[0] < 500 and cell_pos[1] >= 50 and cell_pos[1] < 500 and click[0] == 1:
+            x = int((cell_pos[0] - grid_start_pos[0]) / cell_size )
+            y = int((cell_pos[1] - grid_start_pos[1]) / cell_size )
+            if original_grid[y][x] == 0 and active_cell != cell_pos:
+                active_cell = cell_pos
+                number = None
 
-        fill_in_grid(grid)
-        draw_grid(game_display, grid)
+        if active_cell is not None:
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_1] or keys[pygame.K_KP1]:
+                #show_text_in_cell(game_display, "1", x, y)
+                number = "1"
+            elif keys[pygame.K_2] or keys[pygame.K_KP2]:
+                #show_text_in_cell(game_display, "2", x, y)
+                number = "2"
+            elif keys[pygame.K_3] or keys[pygame.K_KP3]:
+                #show_text_in_cell(game_display, "3", x, y)
+                number = "3"
+            elif keys[pygame.K_4] or keys[pygame.K_KP4]:
+                #show_text_in_cell(game_display, "4", x, y)
+                number = "4"
+            elif keys[pygame.K_5] or keys[pygame.K_KP5]:
+                #show_text_in_cell(game_display, "5", x, y)
+                number = "5"
+            elif keys[pygame.K_6] or keys[pygame.K_KP6]:
+                #show_text_in_cell(game_display, "6", x, y)
+                number = "6"
+            elif keys[pygame.K_7] or keys[pygame.K_KP7]:
+                #show_text_in_cell(game_display, "7", x, y)
+                number = "7"
+            elif keys[pygame.K_8] or keys[pygame.K_KP8]:
+                #show_text_in_cell(game_display, "8", x, y)
+                number = "8"
+            elif keys[pygame.K_9] or keys[pygame.K_KP9]:
+                #show_text_in_cell(game_display, "9", x, y)
+                number = "9"
+            
+            if number is not None:
+                text = font.render(number, 1, BLACK)
+                text_size = font.size(number)
+                text_start_pos = (round((cell_size - text_size[0]) / 2), round((cell_size - text_size[1]) / 2))
+                game_display.blit(text, (grid_start_pos[0] + text_start_pos[0] + (x * cell_size), grid_start_pos[1] + text_start_pos[1] + (y * cell_size)))
+        
         clock.tick(60)
     pygame.quit()
     #quit()
 
-
+def show_text_in_cell(display, text, x, y):
+    text = font.render(text, 1, BLACK)
+    text_size = font.size(text)
+    text_start_pos = (round((cell_size - text_size[0]) / 2), round((cell_size - text_size[1]) / 2))
+    display.blit(text, (grid_start_pos[0] + text_start_pos[0] + (x * cell_size), grid_start_pos[1] + text_start_pos[1] + (y * cell_size)))
 
 def draw_grid(display, grid):
-    grid_start_pos = (100, 100)
-    cell_size = 50
+
     font = pygame.font.SysFont("ubuntumono", 40)
 
     for row in range(len(grid)):
-        for col in range(len(grid[col])):
-            pygame.draw.rect(display, BLACK, (grid_start_pos[0] + (col * cell_size), grid_start_pos[1] + (col * cell_size), cell_size, cell_size), 1)
-            if grid[row][col] != 0:
-                cell_value = str(grid[col][row])
+        for col in range(len(grid[row])):
+            pygame.draw.rect(display, BLACK, (grid_start_pos[0] + (row * cell_size), grid_start_pos[1] + (col * cell_size), cell_size, cell_size), 1)
+            cell_value = str(grid[col][row])
+            if cell_value != "0":
                 text = font.render(cell_value, 1, BLACK)
                 text_size = font.size(cell_value)
                 text_start_pos = (round((cell_size - text_size[0]) / 2), round((cell_size - text_size[1]) / 2))
-                display.blit(text, (grid_start_pos[0] + text_start_pos[0] + (col * cell_size), grid_start_pos[1] + text_start_pos[1] + (col * cell_size)))
-
+                display.blit(text, (grid_start_pos[0] + text_start_pos[0] + (row * cell_size), grid_start_pos[1] + text_start_pos[1] + (col * cell_size)))
     for i in range(3):
         for j in range(3):
-            pygame.draw.rect(display, BLACK, (grid_start_pos[0] + (col * cell_size * 3), grid_start_pos[1] + (col * cell_size * 3), cell_size * 3, cell_size * 3), 5)
+            pygame.draw.rect(display, BLACK, (grid_start_pos[0] + (i * cell_size * 3), grid_start_pos[1] + (j * cell_size * 3), cell_size * 3, cell_size * 3), 5)
 
     pygame.display.update()
 
 
-def button(display, pos, size, active_colour, inactive_colour, text):
+def button(display, pos, size, active_colour, inactive_colour, display_text):
 
+    pygame.draw.rect(display, inactive_colour, (pos[0], pos[1], size[0], size[1]), 0)
+    text = font.render(display_text, 1, BLACK)
+    text_size = font.size(display_text)
+    text_start_pos = (round((size[0] - text_size[0]) / 2), round((size[1] - text_size[1]) / 2))
+    display.blit(text, (pos[0] + text_start_pos[0], pos[1] + text_start_pos[1]))
+
+    mouse = pygame.mouse.get_pos()
+    click = pygame.mouse.get_pressed()
+    mouse_on_button = mouse[0] > pos[0] and mouse[0] < (pos[0] + size[0]) and mouse[1] > pos[1] and mouse[1] < (pos[1] + size[1])
+    if mouse_on_button:
+        pygame.draw.rect(display, active_colour, (pos[0], pos[1], size[0], size[1]), 0)
+        display.blit(text, (pos[0] + text_start_pos[0], pos[1] + text_start_pos[1]))
+        if click[0] == 1:
+            return True
+        else:
+            return False
 
 
 
