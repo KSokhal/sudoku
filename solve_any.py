@@ -26,8 +26,7 @@ def main():
     clock = pygame.time.Clock()
 
     end = False
-    active_cell = None
-
+    allow_edit = False
 
     while not end:
         # Quit case
@@ -38,7 +37,7 @@ def main():
         
         draw_grid(game_display, grid)
         if button(game_display, (600, 100), (100, 50), (82, 82, 82), (42, 42, 42), "Solve"):
-            fill_in_grid(grid)
+            fill_in_grid(game_display, grid)
 
         mouse_pos = pygame.mouse.get_pos()
         click = pygame.mouse.get_pressed()
@@ -47,11 +46,16 @@ def main():
         if cell_pos[0] >= 50 and cell_pos[0] < 500 and cell_pos[1] >= 50 and cell_pos[1] < 500 and click[0] == 1:
             x = int((cell_pos[0] - grid_start_pos[0]) / cell_size )
             y = int((cell_pos[1] - grid_start_pos[1]) / cell_size )
-            if original_grid[y][x] == 0 and active_cell != cell_pos:
-                active_cell = cell_pos
-                number = None
+            number = None
+            if original_grid[y][x] == 0:
+                allow_edit = True
+            else:
+                allow_edit = False
 
-        if active_cell is not None:
+                
+
+        if allow_edit:
+
             keys = pygame.key.get_pressed()
             if keys[pygame.K_1] or keys[pygame.K_KP1]:
                 #show_text_in_cell(game_display, "1", x, y)
@@ -82,6 +86,7 @@ def main():
                 number = "9"
             
             if number is not None:
+                pygame.draw.rect(game_display, WHITE, (grid_start_pos[0] + 10 + (x * cell_size), grid_start_pos[1] + 10 + (y * cell_size), cell_size - 20, cell_size - 20), 0)
                 text = font.render(number, 1, BLACK)
                 text_size = font.size(number)
                 text_start_pos = (round((cell_size - text_size[0]) / 2), round((cell_size - text_size[1]) / 2))
@@ -89,7 +94,7 @@ def main():
         
         clock.tick(60)
     pygame.quit()
-    #quit()
+    quit()
 
 def show_text_in_cell(display, text, x, y):
     text = font.render(text, 1, BLACK)
@@ -105,7 +110,9 @@ def draw_grid(display, grid):
         for col in range(len(grid[row])):
             pygame.draw.rect(display, BLACK, (grid_start_pos[0] + (row * cell_size), grid_start_pos[1] + (col * cell_size), cell_size, cell_size), 1)
             cell_value = str(grid[col][row])
-            if cell_value != "0":
+            if cell_value == "0":
+                pygame.draw.rect(display, WHITE, (grid_start_pos[0] + 10 + (row * cell_size), grid_start_pos[1] + 10 + (col * cell_size), cell_size - 20, cell_size - 20), 0)
+            else:
                 text = font.render(cell_value, 1, BLACK)
                 text_size = font.size(cell_value)
                 text_start_pos = (round((cell_size - text_size[0]) / 2), round((cell_size - text_size[1]) / 2))
@@ -152,7 +159,7 @@ def button(display, pos, size, active_colour, inactive_colour, display_text):
 #
 # @return boolean, if the grid is valid return True
 
-def check_if_valid(grid, row, col, number):
+def check_if_valid(display, grid, row, col, number):
     # Checks if all numbers in row occurs only once
     for i in range(len(grid)):
         if grid[row][i] == number and col != i:
@@ -171,6 +178,9 @@ def check_if_valid(grid, row, col, number):
         for j in range(square[1], square[1] + 3):
             if number == grid[i][j] and i != row and j != col:
                 return False
+    colour = (255, 0, 0)
+    width = 2
+    pygame.draw.rect(display, colour, (grid_start_pos[0] + (row * cell_size) + 1, grid_start_pos[1] + (col * cell_size) + 1, cell_size -2 , cell_size - 2), 4)
 
     return True
 
@@ -194,19 +204,28 @@ def get_next_empty_cell(grid):
 #
 # @return boolean, if the grid was solved True
 
-def fill_in_grid(grid):
+def fill_in_grid(display, grid):
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+
+
     # If an empty cell can be found contiue filling in grid, else return True
     if get_next_empty_cell(grid) is not None:
         # Get the next empty cell
         empty_row, empty_col = get_next_empty_cell(grid)
         for i in range(1, 10):
             # If the value of i is a valid option for the empty cell, enter it in
-            if check_if_valid(grid, empty_row, empty_col, i):
+            if check_if_valid(display, grid, empty_row, empty_col, i):
                 grid[empty_row][empty_col] = i
                 # If the grid can be solved from this point continue solving, else reset the cell and try next number
-                if fill_in_grid(grid):
+                draw_grid(display, grid)
+                if fill_in_grid(display, grid):
                     return True
                 grid[empty_row][empty_col] = 0
+                draw_grid(display, grid)
         return False       
     else:
         return True
