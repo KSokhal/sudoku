@@ -304,7 +304,7 @@ def fill_in_grid(display, grid):
 
 def get_unsolved():
     grid = []
-    with open("unsolved.txt") as file:
+    with open("grid.txt") as file:
         for line in file.readlines():
             row = []
             for number in line.strip("\n"):
