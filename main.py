@@ -5,12 +5,17 @@ from math import floor
 import pygame
 
 # Set display dimensions
-DISPLAY_WIDTH = 800
+DISPLAY_WIDTH = 700
 DISPLAY_HEIGHT = 600
 
 # Sets colours
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+LIGHT_GREY = (100, 100, 100)
+DARK_GREY = (65, 65, 65)
+
 
 # Sets constants for display of grid
 GRID_START_POS = (50, 50)
@@ -23,8 +28,9 @@ def main():
 
     # Initialises varibles for pygame
     pygame.init()
-    global font
+    global font, small_font
     font = pygame.font.SysFont("ubuntumono", 40)
+    small_font = pygame.font.SysFont("ubuntumono", 30)
     game_display = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
     pygame.display.set_caption("Sudoku")
     game_display.fill(WHITE)
@@ -39,18 +45,26 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 end = True
-
-        if button(game_display, (600, 100), (100, 50), (82, 82, 82), (42, 42, 42), "Solve"):
+        
+        # Draws 'sovle' button and wait for it to be pressed
+        if button(game_display, (GRID_START_POS[0] + (10 * CELL_SIZE), GRID_START_POS[1] + CELL_SIZE), ((2 * CELL_SIZE), CELL_SIZE), LIGHT_GREY, DARK_GREY, "Solve"):
+            # If button is pressed, display original grid and solve
             draw_grid(game_display, original_grid)
             fill_in_grid(game_display, original_grid)
 
-        if check(grid) and get_next_empty_cell(grid) is None:
-            print("Complete")
-            text = font.render("Level Complete!", True, (0, 255, 0))
-            game_display.blit(text, (50, 550))
+        # Checks if the grid has been manually completed
+        if check(grid):
+            text = font.render("Level Complete!", True, GREEN)
+            exit_str = "Press any key to quit..."
+            small_text = small_font.render(exit_str , True, BLACK)
+            win_text_start = (50, 525)
+
+            game_display.blit(text, win_text_start)
+            game_display.blit(small_text, (win_text_start[0], win_text_start[1] + small_font.size(exit_str)[1] + 20))
             pygame.display.update()
-            event = pygame.event.wait()
-            if event.type == KEYDOWN:
+
+            ev = pygame.event.wait()
+            if ev.type == pygame.KEYDOWN or ev.type == pygame.QUIT:
                 end = True
 
         mouse_pos = pygame.mouse.get_pos()
@@ -68,7 +82,6 @@ def main():
 
 
         if allow_edit:
-
             keys = pygame.key.get_pressed()
 
             if keys[pygame.K_1] or keys[pygame.K_KP1]:
@@ -89,19 +102,24 @@ def main():
                 number = "8"
             elif keys[pygame.K_9] or keys[pygame.K_KP9]:
                 number = "9"
-            
+            elif keys[pygame.K_BACKSPACE]:
+                number = "0"
+                
             if number is not None:
                 grid[y][x] = int(number)
-                if check_if_valid(grid, y, x, int(number)):
-                    text_colour = BLACK
-                else:
-                    text_colour = (255, 0, 0)
-
                 pygame.draw.rect(game_display, WHITE, (GRID_START_POS[0] + 10 + (x * CELL_SIZE), GRID_START_POS[1] + 10 + (y * CELL_SIZE), CELL_SIZE - 20, CELL_SIZE - 20), 0)
-                text = font.render(number, True, text_colour)
-                text_size = font.size(number)
-                text_start_pos = (round((CELL_SIZE - text_size[0]) / 2), round((CELL_SIZE - text_size[1]) / 2))
-                game_display.blit(text, (GRID_START_POS[0] + text_start_pos[0] + (x * CELL_SIZE), GRID_START_POS[1] + text_start_pos[1] + (y * CELL_SIZE)))
+                
+                if number != "0":
+                    if check_if_valid(grid, y, x, int(number)):
+                        text_colour = BLACK
+                    else:
+                        text_colour = RED
+
+                    text = font.render(number, True, text_colour)
+                    text_size = font.size(number)
+                    text_start_pos = (round((CELL_SIZE - text_size[0]) / 2), round((CELL_SIZE - text_size[1]) / 2))
+                    game_display.blit(text, (GRID_START_POS[0] + text_start_pos[0] + (x * CELL_SIZE), GRID_START_POS[1] + text_start_pos[1] + (y * CELL_SIZE)))
+            
                 pygame.display.update()
 
         clock.tick(60)
@@ -109,6 +127,11 @@ def main():
     pygame.quit()
     quit()
 
+
+## Draws a grid
+#
+# @param display, the pygame display
+# @param grid, nestesd lists that represent a 9x9 grid of intergers
 
 def draw_grid(display, grid):
     for row in range(len(grid)):
@@ -129,38 +152,75 @@ def draw_grid(display, grid):
     pygame.display.update()
 
 
+## Displays a button on the screen, and check if clicked 
+#
+# @param display, the pygame display
+# @param pos, the position of the button
+# @param size, the size of the button
+# @param active_colour, the backgroud colour of the button when the mouse is hovering over it
+# @param inactive_colour, the backgroud colour of the button when the mouse is not hovering over it
+# @param display_text, the text that is displayed on the button
+#
+# @return boolean, if the button is clicked return True
+
 def button(display, pos, size, active_colour, inactive_colour, display_text):
 
-    pygame.draw.rect(display, inactive_colour, (pos[0], pos[1], size[0], size[1]), 0)
     text = font.render(display_text, True, BLACK)
     text_size = font.size(display_text)
     text_start_pos = (round((size[0] - text_size[0]) / 2), round((size[1] - text_size[1]) / 2))
-    display.blit(text, (pos[0] + text_start_pos[0], pos[1] + text_start_pos[1]))
-    pygame.display.update()
+    
     mouse = pygame.mouse.get_pos()
     click = pygame.mouse.get_pressed()
+
     mouse_on_button = mouse[0] > pos[0] and mouse[0] < (pos[0] + size[0]) and mouse[1] > pos[1] and mouse[1] < (pos[1] + size[1])
+
     if mouse_on_button:
         pygame.draw.rect(display, active_colour, (pos[0], pos[1], size[0], size[1]), 0)
-        display.blit(text, (pos[0] + text_start_pos[0], pos[1] + text_start_pos[1]))
-        pygame.display.update()
-        if click[0] == 1:
-            return True
-        else:
-            return False
+    else:
+        pygame.draw.rect(display, inactive_colour, (pos[0], pos[1], size[0], size[1]), 0)
+    
+    display.blit(text, (pos[0] + text_start_pos[0], pos[1] + text_start_pos[1]))
+    pygame.display.update()
 
+    if mouse_on_button and click[0] == 1:
+        return True
+    else:
+        return False
+
+
+## Checks if a grid is valid as a whole
+#
+# @param grid, nestesd lists that represent a 9x9 grid of intergers
+#
+# @return boolean, if the grid is valid return True
 
 def check(grid):
-    for row in range(len(grid)):
-        for col in range(len(grid[row])):
-            for number in range(1, 10):
-                check_if_valid(grid, row, col, number)
+    for row in grid:
+        for i in range(1, 10):
+            if row.count(i) != 1:
+                return False
+
+    for col in range(9):
+        lst = [row[col] for row in grid]
+        for i in range(1, 10):
+            if lst.count(i) != 1:
+                return False
+    
+    for i in range(3):
+        for j in range(3):
+            lst = [row[j* 3:(j*3) + 3] for row in grid[i * 3:(i*3) + 3]] 
+            flat_list = []
+            for k in lst:
+                for number in k:
+                    flat_list.append(number)
+            
+            for check_number in range(1, 10):
+                if flat_list.count(check_number) != 1:
+                    return False
+    return True
 
 
-
-
-
-## Checks if a grid is valid
+## Checks if a grid is valid, based on a number entered into a specific cell
 #
 # @param grid, nestesd lists that represent a 9x9 grid of intergers
 # @param row, the row in the grid
