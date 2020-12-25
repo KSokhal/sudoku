@@ -4,6 +4,8 @@ from math import floor
 
 import pygame
 
+from grid import Grid
+
 # Set display dimensions
 DISPLAY_WIDTH = 700
 DISPLAY_HEIGHT = 600

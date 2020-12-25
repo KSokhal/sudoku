@@ -24,3 +24,9 @@ class Grid:
                 if self.grid[row][col] == 0:
                     return (row, col)
         return None
+
+
+if __name__ == "__main__":
+    grid = Grid()
+    grid.get_unsolved_from_txt()
+    grid.print_txt()
