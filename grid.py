@@ -1,6 +1,8 @@
 class Grid:
-    def __init__(self):
+    def __init__(self, fill=False):
         self.grid = [] 
+        if fill == True:
+            self.get_unsolved_from_txt()
         
 
     def get_unsolved_from_txt(self):
@@ -27,6 +29,6 @@ class Grid:
 
 
 if __name__ == "__main__":
-    grid = Grid()
-    grid.get_unsolved_from_txt()
-    grid.print_txt()
+    sudoku_grid = Grid(fill=True)
+    sudoku_grid.get_unsolved_from_txt()
+    sudoku_grid.print_txt()
