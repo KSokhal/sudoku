@@ -4,8 +4,6 @@ from math import floor
 
 import pygame
 
-from grid import Grid
-
 # Set display dimensions
 DISPLAY_WIDTH = 700
 DISPLAY_HEIGHT = 600
@@ -29,7 +27,6 @@ def main():
     original_grid = copy.deepcopy(grid)
 
     # Initialises varibles for pygame
-    #pylint: disable=no-member
     pygame.init()
     global font, small_font
     font = pygame.font.SysFont("ubuntumono", 40)
@@ -46,7 +43,6 @@ def main():
     while not end:
         # Quit case
         for event in pygame.event.get():
-            #pylint: disable=no-member
             if event.type == pygame.QUIT:
                 end = True
         
@@ -68,7 +64,6 @@ def main():
             pygame.display.update()
 
             ev = pygame.event.wait()
-            #pylint: disable=no-member
             if ev.type == pygame.KEYDOWN or ev.type == pygame.QUIT:
                 end = True
 
@@ -88,7 +83,7 @@ def main():
 
         if allow_edit:
             keys = pygame.key.get_pressed()
-            #pylint: disable=no-member
+
             if keys[pygame.K_1] or keys[pygame.K_KP1]:
                 number = "1"
             elif keys[pygame.K_2] or keys[pygame.K_KP2]:
@@ -128,7 +123,7 @@ def main():
                 pygame.display.update()
 
         clock.tick(60)
-    #pylint: disable=no-member
+
     pygame.quit()
     quit()
 
@@ -278,7 +273,6 @@ def get_next_empty_cell(grid):
 def fill_in_grid(display, grid):
 
     for event in pygame.event.get():
-        #pylint: disable=no-member
         if event.type == pygame.QUIT:
                 pygame.quit()
                 quit()

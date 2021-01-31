@@ -26,9 +26,12 @@ class Grid:
                 if self.grid[row][col] == 0:
                     return (row, col)
         return None
+<<<<<<< HEAD
 
 
 if __name__ == "__main__":
     sudoku_grid = Grid(fill=True)
     sudoku_grid.get_unsolved_from_txt()
     sudoku_grid.print_txt()
+=======
+>>>>>>> 15099d0240144f12b8f71682190ad7684591ae7f
