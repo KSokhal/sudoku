@@ -18,14 +18,15 @@ class Grid:
                     row.append(int(number))
                 self.grid.append(row)
 
-    ## Checks if a grid is valid, based on a number entered into a specific cell
-    #
-    # @param row, the row in the grid
-    # @param col, the column of the grid
-    # @param number, the number that has most recently been changed
-    #
-    # @return boolean, if the grid is valid return True
     def check_if_valid(self, row, col, number):
+        """
+        Checks it the grid is valid based of a number entered into a specific cell.
+        
+        Paramters:
+            row, the row in the grid
+            col, the column of the grid
+            number, the number that has most recently been changed
+        """
         # Checks if all numbers in row occurs only once
         for i in range(len(self.grid[row])):
             if self.grid[row][i] == number and col != i:
@@ -46,10 +47,11 @@ class Grid:
                     return False
         return True
 
-    ## Gets the next empty cell in the grid
-    #
-    # @return coordinates of empty cell if found, None if no empty cells
     def get_next_empty_cell(self):
+        """
+        Gets the position of the next empty cell.
+        Returns the cell postition is empty one exists, or None if it does not
+        """
         for row in range(len(self.grid)):
             for col in range(len(self.grid[0])):
                 if self.grid[row][col] == 0:
@@ -57,6 +59,13 @@ class Grid:
         return None
 
     def solve(self, drawer, display):
+        """
+        Solves the grid.
+
+        Parameters:
+            drawer: helper function used to draw cells on to the pygame display
+            display: pygame diaply
+        """
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -87,13 +96,8 @@ class Grid:
         else:
             return True
 
-
-    ## Checks if a grid is valid as a whole
-    #
-    # @param grid, nestesd lists that represent a 9x9 grid of intergers
-    #
-    # @return boolean, if the grid is valid return True
     def check(self):
+        """Checks it the grid as a whole is valid."""
         for row in self.grid:
             for i in range(1, 10):
                 if row.count(i) != 1:

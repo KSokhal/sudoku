@@ -146,12 +146,14 @@ def draw_cell(display, col, row , value, text_colour = BLACK, update=True):
         pygame.display.update()
 
 
-# ## Draws a grid
-# #
-# # @param display, the pygame display
-# # @param grid, nestesd lists that represent a 9x9 grid of intergers
-
 def draw_grid(display, grid):
+    """
+    Draws grid to pygame display.
+
+    Paramters:
+        display: Pygame display object
+        grid: Nested list of ints in a 9x9 shape
+    """
     for row in range(len(grid)):
         for col in range(len(grid[row])):
             cell_value = str(grid[col][row])
@@ -162,18 +164,19 @@ def draw_grid(display, grid):
     pygame.display.update()
 
 
-## Displays a button on the screen, and check if clicked 
-#
-# @param display, the pygame display
-# @param pos, the position of the button
-# @param size, the size of the button
-# @param active_colour, the backgroud colour of the button when the mouse is hovering over it
-# @param inactive_colour, the backgroud colour of the button when the mouse is not hovering over it
-# @param display_text, the text that is displayed on the button
-#
-# @return boolean, if the button is clicked return True
 
 def button(display, pos, size, active_colour, inactive_colour, display_text):
+    """
+    Displays a button of the display and handles click adn hover events.
+    
+    Parameters:
+        display: pygame display
+        pos: postion of the button in the format (x, y)
+        size: size of the button in the format (x, y)
+        active_colour: colour the button should be when active in RGB format
+        inactive_colour: colour the button should be when inactive in RGB format
+        display_text: the text to be displayed in the button
+    """
 
     text = font.render(display_text, True, BLACK)
     text_size = font.size(display_text)
